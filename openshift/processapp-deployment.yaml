@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uuid-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uuid-demo
+  template:
+    metadata:
+      labels:
+        app: uuid-demo
+    spec:
+      securityContext: {}
+      containers:
+        - name: uuid-demo
+          image: quay.io/sluetzen/uuidapp:1.1 # e.g. image-registry.openshift-image-registry.svc:5000/<namespace>/uuid-demo:latest
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi

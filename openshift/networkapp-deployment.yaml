@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: networkapp-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: networkapp-demo
+  template:
+    metadata:
+      labels:
+        app: networkapp-demo
+    spec:
+      securityContext: {}
+      containers:
+        - name: networkapp-demo
+          image: quay.io/sluetzen/networkapp:1.1 # e.g. image-registry.openshift-image-registry.svc:5000/<namespace>/networkapp-demo:latest
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi

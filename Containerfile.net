@@ -1,18 +1,15 @@
-FROM registry.access.redhat.com/ubi9/go-toolset:latest AS builder
+FROM registry.access.redhat.com/hi/go:latest AS builder
 
-# Use default writable path for UBI go-toolset
-WORKDIR /opt/app-root/src
+WORKDIR /app
 COPY go.mod ./
 RUN go mod download || true
 COPY cmd ./cmd
 
-# Build static binaries (no cgo) for minimal runtime
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o /opt/app-root/src/bin/networkapp ./cmd/networkapp
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o /tmp/networkapp ./cmd/networkapp
 
-FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
+FROM registry.access.redhat.com/hi/core-runtime:latest
 
-COPY --from=builder /opt/app-root/src/bin/networkapp /usr/local/bin/networkapp
-RUN chmod 0755 /usr/local/bin/networkapp
+COPY --from=builder --chmod=0755 /tmp/networkapp /app
 
 # Do not set USER; OpenShift assigns a random non-root UID
-CMD ["/usr/local/bin/networkapp"]
+ENTRYPOINT ["/app"]
